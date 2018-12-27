@@ -1,2 +1,16 @@
 # rextester_cli
-A telethon userbot to comunicate with https://rextester.com
+# Usage:
+
+## Open any telegram chat and type:
+```
+$language <code>
+```
+
+## Example:
+
+```
+$py3 print('Hello World')
+```
+
+## Inspirated by:
+  https://github.com/wrxck/rextester-telegram-bot
