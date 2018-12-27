@@ -40,7 +40,7 @@ async def rextestercli(event):
             await event.edit("Did you forget to output something?")
 
         await event.edit(
-            "**Language:**\n`{}`\n\n**Source:**\n`{}`\n{}".format(lang, source, output)
+            "**Language:**\n`{}`\n\n**Source:**\n`{}`\n\n{}".format(lang, source, output)
         )
     else:
         await event.edit("Unknown language")
