@@ -38,6 +38,7 @@ async def rextestercli(event):
             output = "**Warnings:**\n\n`{}`".format(response["Warnings"])
         else:
             await event.edit("Did you forget to output something?")
+            return
 
         await event.edit(
             "**Language:**\n`{}`\n\n**Source:**\n`{}`\n\n{}".format(lang, source, output)
