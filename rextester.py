@@ -1,57 +1,58 @@
-import asyncio
 import logging
+import re
 
-import requests
-from telethon import TelegramClient, events
+from telethon import events
+from telethon.sync import TelegramClient
 
-from langs import dict
-
-api_id = 12345  # your api id here
-api_hash = ""  # your api hash here
-client = TelegramClient("rextester", api_id, api_hash)
-
-
-RUN_URL = "https://rextester.com/rundotnet/api"
+from api.rextester import CompilerError, Rextester
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 
 
-@client.on(events.NewMessage(outgoing=True, pattern="^\$([\w.#+]+)\s+([\s\S]+)"))
+api_id = 12345  # your api id here
+api_hash = "abcd1234"  # your api hash here
+
+client = TelegramClient("rextester", api_id, api_hash)
+
+
+@client.on(events.NewMessage(outgoing=True, pattern="^\$"))
 async def rextestercli(event):
-    lang = event.pattern_match.group(1)
-    source = event.pattern_match.group(2)
-    if lang in dict:
-        langcode = dict[lang]
+    stdin = ""
+    message = event.text
 
-        data = {"LanguageChoice": langcode, "Program": source}
+    if len(message.split()) > 1:
+        language = re.search("\$([\w.#+]+)", message).group(1)
+        code = re.search("\s([\s\S]+)", message).group(1)
+        print(code + "\n\n")
+        if "/stdin" in message:
+            code = re.search("\s([\s\S]+)(?=/stdin)", message).group(1)
+            stdin = re.search("\/stdin\s*([\s\S]+)", message).group(1)
+            print(stdin + "\n\n")
 
-        request = requests.post(RUN_URL, data=data)
-        response = request.json()
-
-        if response["Result"]:
-            output = "**Result:**\n\n`{}`".format(response["Result"])
-        elif response["Errors"]:
-            output = "**Errors:**\n\n`{}`".format(response["Errors"])
-        elif response["Warnings"]:
-            output = "**Warnings:**\n\n`{}`".format(response["Warnings"])
-        else:
-            await event.edit("Did you forget to output something?")
+        try:
+            regexter = Rextester(language, code, stdin)
+        except CompilerError as exc:
+            await event.edit(str(exc))
             return
 
-        await event.edit(
-            "**Language:**\n`{}`\n\n**Source:**\n`{}`\n\n{}".format(lang, source, output)
-        )
-    else:
-        await event.edit("Unknown language")
+        output = ""
+        output += "**Language:**\n`{}`".format(language)
+        output += "**\n\nSource:**\n`{}`".format(code)
+
+        if regexter.result():
+            output += "\n\nResult:\n`{}`".format(regexter.result())
+
+        if regexter.warnings():
+            output += "\n\n**Warnings:**\n`{}`\n".format(regexter.warnings())
+
+        if regexter.errors():
+            output += "\n\n**Errors:**\n'{}`".format(regexter.errors())
+
+        await event.edit(output)
 
 
-async def RunClient():
-    await client.start()
-    await client.get_me()
-    await client.run_until_disconnected()
-
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(RunClient())
+with client:
+    client.start()
+    client.run_until_disconnected()

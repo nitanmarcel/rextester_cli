@@ -1,16 +1,9 @@
 # rextester_cli
-# Usage:
 
-## Open any telegram chat and type:
-```
-$language <code>
-```
-
-## Example:
+## Usage:
 
 ```
-$py3 print('Hello World')
+$<language> <code> [/stdin <inpt>]
 ```
 
-## Inspirated by:
-  https://github.com/wrxck/rextester-telegram-bot
+See api.langs for a list of supported language
