@@ -23,12 +23,12 @@ async def rextestercli(event):
     message = event.text
 
     if len(message.split()) > 1:
-        language = re.search("\$([\w.#+]+)", message).group(1)
-        code = re.search("\s([\s\S]+)", message).group(1)
+        regex = re.search('^\$([\w.#+]+)\s+([\s\S]+?)(?:\s+\/stdin\s+([\s\S]+))?$', message, re.IGNORECASE)
+        language = regex.group(1)
+        code = regex.group(2)
+        stdin = regex.group(3)
 
-        if "/stdin" in message:
-            code = re.search("\s([\s\S]+)(?=/stdin)", message).group(1)
-            stdin = re.search("\/stdin\s*([\s\S]+)", message).group(1)
+
 
         try:
             regexter = Rextester(language, code, stdin)
