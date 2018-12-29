@@ -40,18 +40,17 @@ async def rextestercli(event):
         output += "**Language:**\n`{}`".format(language)
         output += "**\n\nSource:**\n`{}`".format(code)
 
-        if regexter.result():
-            output += "\n\nResult:\n`{}`".format(regexter.result())
+        if regexter.result:
+            output += "\n\nResult:\n`{}`".format(regexter.result)
 
-        if regexter.warnings():
-            output += "\n\n**Warnings:**\n`{}`\n".format(regexter.warnings())
+        if regexter.warnings:
+            output += "\n\n**Warnings:**\n`{}`\n".format(regexter.warnings)
 
-        if regexter.errors():
-            output += "\n\n**Errors:**\n'{}`".format(regexter.errors())
+        if regexter.errors:
+            output += "\n\n**Errors:**\n'{}`".format(regexter.errors)
 
         await event.edit(output)
 
 
 with client:
-    client.start()
     client.run_until_disconnected()
