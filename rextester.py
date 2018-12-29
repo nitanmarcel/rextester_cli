@@ -37,17 +37,17 @@ async def rextestercli(event):
             return
 
         output = ""
-        output += "**Language:**\n`{}`".format(language)
-        output += "**\n\nSource:**\n`{}`".format(code)
+        output += "**Language:**\n```{}```".format(language)
+        output += "\n\n**Source:** \n```{}```".format(code)
 
         if regexter.result:
-            output += "\n\nResult:\n`{}`".format(regexter.result)
+            output += "\n\n**Result:** \n```{}```".format(regexter.result)
 
         if regexter.warnings:
-            output += "\n\n**Warnings:**\n`{}`\n".format(regexter.warnings)
+            output += "\n\n**Warnings:** \n```{}```\n".format(regexter.warnings)
 
         if regexter.errors:
-            output += "\n\n**Errors:**\n'{}`".format(regexter.errors)
+            output += "\n\n**Errors:** \n'```{}```".format(regexter.errors)
 
         await event.edit(output)
 
