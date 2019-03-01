@@ -1,31 +1,40 @@
-import requests
+import aiohttp
 
 from api.langs import languages
 
-URL = "https://rextester.com/rundotnet/api"
+
+async def __fetch(session, url, data):
+    async with session.get(url, data=data) as response:
+        response.raise_for_status()
+        return await response.json()
 
 
-class Rextester:
-    def __init__(self, lang, code, stdin):
-        if lang not in languages:
-            raise CompilerError("Unknown language")
+async def rexec(lang, code, stdin):
+    if lang.lower() not in languages:
+        raise UnknownLanguage("Unknown Language")
 
-        data = {"LanguageChoice": languages[lang], "Program": code, "Input": stdin}
+    data = {
+        "LanguageChoice": languages[lang.lower()],
+        "Program": code,
+        "Input": stdin}
 
-        request = requests.post(URL, data=data)
-        self.response = request.json()
-        self.result = self.response["Result"]
-        self.warnings = self.response["Warnings"]
-        self.errors = self.response["Errors"]
-        self.stats = self.response["Stats"]
-        self.files = self.response["Files"]
-
-        if not code:
-            raise CompilerError("Invalid Query")
-
-        elif not any([self.result, self.warnings, self.errors]):
-            raise CompilerError("Did you forget to output something?")
+    async with aiohttp.ClientSession(raise_for_status=True) as session:
+        response = await __fetch(session, "https://rextester.com/rundotnet/api", data)
+        return RextesterResult(response.get("Result"),
+                               response.get("Warnings"),
+                               response.get("Errors"),
+                               response.get("Stats"),
+                               response.get("Files"))
 
 
-class CompilerError(Exception):
+class UnknownLanguage(Exception):
     pass
+
+
+class RextesterResult(object):
+    def __init__(self, results, warnings, errors, stats, files):
+        self.results = results
+        self.warnings = warnings
+        self.errors = errors
+        self.stats = stats
+        self.files = files
